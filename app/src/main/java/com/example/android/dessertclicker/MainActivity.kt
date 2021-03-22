@@ -18,6 +18,8 @@ package com.example.android.dessertclicker
 
 import android.content.ActivityNotFoundException
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
@@ -33,8 +35,10 @@ class MainActivity : AppCompatActivity() {
     private var revenue = 0
     private var dessertsSold = 0
 
+
     // Contains all the views
     private lateinit var binding: ActivityMainBinding
+    private lateinit var dessertTimer: DessertTimer
 
     /** Dessert Data **/
 
@@ -64,7 +68,8 @@ class MainActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        Log.i("MainActivity", "onStart Called")
+        Timber.i("onStart Called")
+        dessertTimer.startTimer()
     }
 
     private var currentDessert = allDesserts[0]
@@ -72,6 +77,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Timber.i("onCreate called")
+        dessertTimer.stopTimer()
 
         // Use Data Binding to get reference to the views
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
@@ -92,7 +98,7 @@ class MainActivity : AppCompatActivity() {
      * Updates the score when the dessert is clicked. Possibly shows a new dessert.
      */
     private fun onDessertClicked() {
-
+        dessertTimer = DessertTimer()
         // Update the score
         revenue += currentDessert.price
         dessertsSold++
@@ -173,5 +179,21 @@ class MainActivity : AppCompatActivity() {
     override fun onRestart() {
         super.onRestart()
         Timber.i("onRestart Called")
+    }
+    class DessertTimer {
+        var secondsCount = 0
+        private var handler = Handler(Looper.getMainLooper())
+        private lateinit var runnable: Runnable
+        fun startTimer() {
+            runnable = Runnable {
+                secondsCount++
+                Timber.i("Timer is at : $secondsCount")
+                handler.postDelayed(runnable, 1000)
+            }
+            handler.postDelayed(runnable, 1000)
+        }
+        fun stopTimer() {
+            handler.removeCallbacks(runnable)
+        }
     }
 }
