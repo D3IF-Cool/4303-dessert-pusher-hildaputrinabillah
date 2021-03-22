@@ -21,6 +21,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import android.view.ActionMode
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
@@ -66,18 +67,11 @@ class MainActivity : AppCompatActivity() {
             Dessert(R.drawable.oreo, 7000, 20000)
     )
 
-    override fun onStart() {
-        super.onStart()
-        Timber.i("onStart Called")
-        dessertTimer.startTimer()
-    }
-
     private var currentDessert = allDesserts[0]
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Timber.i("onCreate called")
-        dessertTimer.stopTimer()
 
         // Use Data Binding to get reference to the views
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
@@ -85,6 +79,7 @@ class MainActivity : AppCompatActivity() {
         binding.dessertButton.setOnClickListener {
             onDessertClicked()
         }
+        dessertTimer = DessertTimer(this.lifecycle)
 
         // Set the TextViews to the right values
         binding.revenue = revenue
@@ -98,7 +93,7 @@ class MainActivity : AppCompatActivity() {
      * Updates the score when the dessert is clicked. Possibly shows a new dessert.
      */
     private fun onDessertClicked() {
-        dessertTimer = DessertTimer()
+
         // Update the score
         revenue += currentDessert.price
         dessertsSold++
@@ -132,10 +127,35 @@ class MainActivity : AppCompatActivity() {
             binding.dessertButton.setImageResource(newDessert.imageId)
         }
     }
+    override fun onActionModeStarted(mode: ActionMode?){
+        super.onActionModeStarted(mode)
+    }
 
-    /**
-     * Menu methods
-     */
+    override fun onStart() {
+        super.onStart()
+        Timber.i("onStart Called")
+    }
+    override fun onResume() {
+        super.onResume()
+        Timber.i("onResume Called")
+    }
+    override fun onPause() {
+        super.onPause()
+        Timber.i("onPause Called")
+    }
+    override fun onStop() {
+        super.onStop()
+        Timber.i("onStop Called")
+    }
+    override fun onDestroy() {
+        super.onDestroy()
+        Timber.i("onDestroy Called")
+    }
+    override fun onRestart() {
+        super.onRestart()
+        Timber.i("onRestart Called")
+    }
+
     private fun onShare() {
         val shareIntent = ShareCompat.IntentBuilder.from(this)
                 .setText(getString(R.string.share_text, dessertsSold, revenue))
@@ -159,41 +179,5 @@ class MainActivity : AppCompatActivity() {
             R.id.shareMenuButton -> onShare()
         }
         return super.onOptionsItemSelected(item)
-    }
-    override fun onResume() {
-        super.onResume()
-        Timber.i("onResume Called")
-    }
-    override fun onPause() {
-        super.onPause()
-        Timber.i("onPause Called")
-    }
-    override fun onStop() {
-        super.onStop()
-        Timber.i("onStop Called")
-    }
-    override fun onDestroy() {
-        super.onDestroy()
-        Timber.i("onDestroy Called")
-    }
-    override fun onRestart() {
-        super.onRestart()
-        Timber.i("onRestart Called")
-    }
-    class DessertTimer {
-        var secondsCount = 0
-        private var handler = Handler(Looper.getMainLooper())
-        private lateinit var runnable: Runnable
-        fun startTimer() {
-            runnable = Runnable {
-                secondsCount++
-                Timber.i("Timer is at : $secondsCount")
-                handler.postDelayed(runnable, 1000)
-            }
-            handler.postDelayed(runnable, 1000)
-        }
-        fun stopTimer() {
-            handler.removeCallbacks(runnable)
-        }
     }
 }
